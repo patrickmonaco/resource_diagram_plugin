@@ -26,7 +26,7 @@
         "internalName" : "COM.GPMFACTORY.RESOURCE_DIAGRAM",
         "type" : "region",
         "demo" : "https://apex.oracle.com/pls/apex/f?p=109216:5",
-        "previewImage" : "https://github.com/patrickmonaco/resource_diagram_plugin/blob/master/Capture1.PNG"
+        "previewImage" : "https://raw.githubusercontent.com/patrickmonaco/resource_diagram_plugin/master/Capture1.PNG"
       }
     }
   }
