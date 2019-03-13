@@ -1,0 +1,33 @@
+{
+  "name" : "Resource Diagram",
+  "version" : "v1.1",
+  "description" : "This plugin displays temporal data as a Resource diagram base on VIS module.",
+  "keywords" : ["diagram", "time", "cloud", "planning"],
+  "homepage" : "https://github.com/patrickmonaco/resource_diagram_plugin",
+  "bugs" : {
+    "url" : "https://github.com/patrickmonaco/resource_diagram_plugin/issues",
+    "email" : "patrick.monaco@gmail.com"
+  },
+  "license" : "MIT",
+  "author" : {
+    "name" : "Patrick Monaco",
+    "email" : "patrick.monaco@gmail.com",
+    "url" : "https://gpmfactory.com"
+  },
+  "repository" : {
+    "type" : "git",
+    "url" : "https://github.com/patrickmonaco/resource_diagram_plugin.git"
+  },
+ "oracle" : {
+    "versions" : ["11.2.0.1", "12.1.0.1"],
+    "apex" : {
+      "versions" : ["5.0.0"],
+      "plugin" : {
+        "internalName" : "COM.GPMFACTORY.RESOURCE_DIAGRAM",
+        "type" : "region",
+        "demo" : "https://apex.oracle.com/pls/apex/f?p=109216:1",
+        "previewImage" : "https://raw.githubusercontent.com/patrickmonaco/apex-content-plugin/master/apex21.PNG"
+      }
+    }
+  }
+}
