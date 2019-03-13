@@ -1,6 +1,6 @@
 {
   "name" : "Resource Diagram",
-  "version" : "ea",
+  "version" : "v1.1",
   "description" : "This plugin displays time data as a Resource diagram based on VIS module.",
   "keywords" : ["diagram", "time", "cloud", "planning"],
   "homepage" : "https://github.com/patrickmonaco/resource_diagram_plugin",
