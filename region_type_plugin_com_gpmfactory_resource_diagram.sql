@@ -24,7 +24,7 @@ end;
 prompt --application/shared_components/plugins/region_type/com_gpmfactory_resource_diagram
 begin
 wwv_flow_api.create_plugin(
- p_id=>wwv_flow_api.id(40765738027245842)
+ p_id=>wwv_flow_api.id(36391523711767813062)
 ,p_plugin_type=>'REGION TYPE'
 ,p_name=>'COM.GPMFACTORY.RESOURCE_DIAGRAM'
 ,p_display_name=>'Resource Diagram'
@@ -34,13 +34,11 @@ wwv_flow_api.create_plugin(
 '#PLUGIN_FILES#vis.min.js'))
 ,p_css_file_urls=>'#PLUGIN_FILES#vis.min.css'
 ,p_plsql_code=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'-- Oracle APEX plugin: Resource Diagram',
+'-- Oracle APEX plugin: Resource Diagram Plugin',
 '-- GPM FACTORY - march 2019',
-'-- https://github.com/patrickmonaco/apex-resourcediagram-plugin',
-'-- https://gpmfactory.com',
+'-- https://github.com/patrickmonaco/resource_diagram_plugin',
+'-- developer site: https://gpmfactory.com',
 '-- based on VIS timeline module (http://visjs.org)',
-'-- Limitations: ',
-'-- V1.1',
 '',
 'FUNCTION render_plan',
 '    (p_region IN APEX_PLUGIN.t_region',
@@ -52,6 +50,7 @@ wwv_flow_api.create_plugin(
 '    l_mode_col      plugin_attr := p_region.attribute_05;      -- Edit Mode',
 '    l_zoommin       plugin_attr := p_region.attribute_14;      -- Zoom min',
 '    l_options       plugin_attr := p_region.attribute_06;      -- Options',
+'    l_locale        plugin_attr := p_region.attribute_15;      -- Locale',
 '    ',
 '    l_result     APEX_PLUGIN.t_region_render_result;',
 '    l_script     varchar2(32767);',
@@ -80,7 +79,7 @@ wwv_flow_api.create_plugin(
 '        ,p_is_printer_friendly => p_is_printer_friendly',
 '    );',
 'END IF;',
-'',
+'--htp.p(p_region.source);',
 '-- get the identifier of plugin Ajax process',
 'l_ajax_id := apex_plugin.get_ajax_identifier;',
 '',
@@ -166,7 +165,7 @@ wwv_flow_api.create_plugin(
 '    onRemove: function (item, callback){ ',
 '       editTask("remove",items,item,callback);   ',
 '    },',
-'    locale: "fr",  ',
+'    locale: "''|| l_locale ||''",  ',
 '   tooltipOnItemUpdateTime: true   ',
 '   // min: "2019-03-03",                // lower limit of visible range',
 '   // max: "2019-03-07",                // upper limit of visible range',
@@ -188,7 +187,7 @@ wwv_flow_api.create_plugin(
 '  itemCount = pData.data.tnb;',
 '  names = pData.data.groups;',
 '  ds = pData.data.tasks; ',
-'  console.log("count fonc="+groupCount);  ',
+'  //console.log("count fonc="+groupCount);  ',
 '} ',
 'function redraw(){',
 '  apex.server.plugin ( ',
@@ -241,6 +240,7 @@ wwv_flow_api.create_plugin(
 '         },',
 '        { dataType: "text",',
 '            success: function(pData){  ',
+'                console.log(pData);',
 '                eval("var myWindow="+ pData );',
 '            }       ',
 '         }   ',
@@ -254,7 +254,8 @@ wwv_flow_api.create_plugin(
 '         }',
 '      , { dataType: "text"',
 '        ,success: function(pData){',
-'             var d1 = JSON.parse(pData);',
+'             ',
+'             var d1 = JSON.parse(pData); ',
 '             renderPlan(d1); ',
 '             }       ',
 '        });      ',
@@ -373,6 +374,7 @@ wwv_flow_api.create_plugin(
 '-- Process is called for retrieving data',
 '--',
 '-- Build the query which returns groups',
+'--htp.p(''source=''|| p_region.source);',
 '  l_res_source := ''select DISTINCT NVL(to_char('' || l_res_col ||''),''''TBD'''') '' || l_res_col ||'' from ('' || rtrim(l_region_source, '' ;'') || '') ORDER BY 1 '';',
 '-- overide main query in order to retrieve TIME  ',
 '  l_data_source := ''select a.*, to_char(''||l_start_col||'', ''''YYYY-MM-DD"T"HH24:MI:SS'''') Z_START ''|| ',
@@ -493,12 +495,13 @@ wwv_flow_api.create_plugin(
 '                   );',
 'end if; ',
 '',
+'htp.prn(''{"data": {"groups":'' || tnames || '',"tasks":'');',
 '-- -------------------------------------',
 '-- Build the VIS Dataset',
 '-- -------------------------------------',
 '',
 'tflag := 0;',
-'t2 := ''['';',
+'htp.prn(''['');',
 'for i in 1 .. l_cvalue_list(1).value_list.count loop ',
 '    t_nb := t_nb+1;',
 '    ',
@@ -535,23 +538,21 @@ wwv_flow_api.create_plugin(
 '    --sys.htp.p(l_cvalue_list(1).value_list(start_colno).date_value);',
 '     ',
 '     if tflag = 1 then',
-'        t2 := t2 ||'','';',
+'        htp.prn('','');',
 '     end if;',
 '     if l_end_col is not null then ',
-'         t2 := t2 || ''{"id": "''||l_id_val||''", "group":"'' ||l_res_val|| ''", "content": "''||l_task_val||''","start": "''||l_zstart_val||''","end": "''||l_zend_val||''","ires": "''||l_ires_val||''"}''; ',
+'        htp.prn(''{"id": "''||l_id_val||''", "group":"'' ||l_res_val|| ''", "content": "''||l_task_val||''","start": "''||l_zstart_val||''","end": "''||l_zend_val||''","ires": "''||l_ires_val||''"}''); ',
 '     else',
-'         t2 := t2 || ''{"id":"''||l_id_val||''", "group":"'' ||l_res_val|| ''", "content":"''||l_task_val||''","start":"''||l_zstart_val||''","ires":"''||l_ires_val||''"}''; ',
+'        htp.prn(''{"id":"''||l_id_val||''", "group":"'' ||l_res_val|| ''", "content":"''||l_task_val||''","start":"''||l_zstart_val||''","ires":"''||l_ires_val||''"}'');',
 '     end if;',
 '     if tflag = 0 then ',
 '        tflag := 1;',
 '     end if;  ',
 '     tnb := tnb+1;   ',
 'end loop;',
-'t2 := t2 ||'']'';',
-'--tdata := ''{{"tnbg":''||tnbg ||'',"tnb":'' || tnb || ''},'' || tnames || '','' || t2 || ''}'';',
-'tdata := ''{"data": {"tnbg":''||tnbg ||'',"tnb":'' || tnb || '', "groups":'' || tnames || '',"tasks":'' || t2 || ''}}'';',
-'--tdata := t2;',
-'htp.p(tdata);',
+'        ',
+'htp.prn(''],"tnbg":''||tnbg ||'',"tnb":'' || tnb || ''}}'');          ',
+'',
 'return  null;',
 '    ',
 'exception when others then',
@@ -564,19 +565,34 @@ wwv_flow_api.create_plugin(
 ,p_api_version=>2
 ,p_render_function=>'render_plan'
 ,p_ajax_function=>'get_data'
-,p_standard_attributes=>'SOURCE_LOCATION:NO_DATA_FOUND_MESSAGE:INIT_JAVASCRIPT_CODE'
+,p_standard_attributes=>'SOURCE_SQL:NO_DATA_FOUND_MESSAGE:INIT_JAVASCRIPT_CODE'
 ,p_substitute_attributes=>true
 ,p_subscribe_plugin_settings=>true
 ,p_help_text=>wwv_flow_string.join(wwv_flow_t_varchar2(
 'This plugin displays the content of a query as a resource diagram.',
-'It relies on the VIS Timeline module.'))
+'It relies on the VIS Timeline module. (http://visjs.org/timeline_examples.html)',
+'',
+'The query must produce, at least, the following informations:',
+'Column which contains resource name',
+'Column which contains a unique id',
+'Column which contains a start date',
+'Column which contains a task name  ',
+'',
+'The columns names haven''t to follow any convention',
+'',
+'ie: select * from emp',
+'',
+'group : JOB',
+'start date: HIREDATE',
+'id: EMPNO',
+'task name: ENAME'))
 ,p_version_identifier=>'1.1'
-,p_about_url=>'https://github.com/patrickmonaco/apex-content-plugin'
+,p_about_url=>'https://github.com/patrickmonaco/resource_diagram_plugin'
 ,p_files_version=>6
 );
 wwv_flow_api.create_plugin_attribute(
- p_id=>wwv_flow_api.id(3280745456003526)
-,p_plugin_id=>wwv_flow_api.id(40765738027245842)
+ p_id=>wwv_flow_api.id(36354038719196570746)
+,p_plugin_id=>wwv_flow_api.id(36391523711767813062)
 ,p_attribute_scope=>'COMPONENT'
 ,p_attribute_sequence=>1
 ,p_display_sequence=>20
@@ -585,10 +601,15 @@ wwv_flow_api.create_plugin_attribute(
 ,p_is_required=>true
 ,p_column_data_types=>'VARCHAR2:NUMBER:DATE'
 ,p_is_translatable=>false
+,p_help_text=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'The column which provides content for grouping lines',
+'(The plugin will execute a secondary query which retrieve the DISTINCT values of this colum)',
+'ie: if the query is : select * fro emp',
+'the group column can be JOB'))
 );
 wwv_flow_api.create_plugin_attribute(
- p_id=>wwv_flow_api.id(40767765710245845)
-,p_plugin_id=>wwv_flow_api.id(40765738027245842)
+ p_id=>wwv_flow_api.id(36391525739450813065)
+,p_plugin_id=>wwv_flow_api.id(36391523711767813062)
 ,p_attribute_scope=>'COMPONENT'
 ,p_attribute_sequence=>2
 ,p_display_sequence=>30
@@ -598,11 +619,11 @@ wwv_flow_api.create_plugin_attribute(
 ,p_column_data_types=>'VARCHAR2'
 ,p_supported_ui_types=>'DESKTOP'
 ,p_is_translatable=>false
-,p_help_text=>'Select the coulumn used for displaying each task content'
+,p_help_text=>'Select the column content used for displaying each task content as a box'
 );
 wwv_flow_api.create_plugin_attribute(
- p_id=>wwv_flow_api.id(12506480257511138)
-,p_plugin_id=>wwv_flow_api.id(40765738027245842)
+ p_id=>wwv_flow_api.id(36363264453998078358)
+,p_plugin_id=>wwv_flow_api.id(36391523711767813062)
 ,p_attribute_scope=>'COMPONENT'
 ,p_attribute_sequence=>3
 ,p_display_sequence=>140
@@ -611,10 +632,11 @@ wwv_flow_api.create_plugin_attribute(
 ,p_is_required=>true
 ,p_column_data_types=>'NUMBER:ROWID'
 ,p_is_translatable=>false
+,p_help_text=>'A unique column ID (any number)'
 );
 wwv_flow_api.create_plugin_attribute(
- p_id=>wwv_flow_api.id(12507134721514391)
-,p_plugin_id=>wwv_flow_api.id(40765738027245842)
+ p_id=>wwv_flow_api.id(36363265108462081611)
+,p_plugin_id=>wwv_flow_api.id(36391523711767813062)
 ,p_attribute_scope=>'COMPONENT'
 ,p_attribute_sequence=>4
 ,p_display_sequence=>150
@@ -623,10 +645,11 @@ wwv_flow_api.create_plugin_attribute(
 ,p_is_required=>true
 ,p_column_data_types=>'DATE:TIMESTAMP'
 ,p_is_translatable=>false
+,p_help_text=>'A column date used for the start date'
 );
 wwv_flow_api.create_plugin_attribute(
- p_id=>wwv_flow_api.id(12550763247587570)
-,p_plugin_id=>wwv_flow_api.id(40765738027245842)
+ p_id=>wwv_flow_api.id(36363308736988154790)
+,p_plugin_id=>wwv_flow_api.id(36391523711767813062)
 ,p_attribute_scope=>'COMPONENT'
 ,p_attribute_sequence=>5
 ,p_display_sequence=>160
@@ -637,27 +660,27 @@ wwv_flow_api.create_plugin_attribute(
 ,p_supported_ui_types=>'DESKTOP'
 ,p_is_translatable=>false
 ,p_lov_type=>'STATIC'
-,p_help_text=>'Allows EDIT mode (drag& Drop, Delete)'
+,p_help_text=>'Allows or not EDIT mode (drag& Drop, Delete)'
 );
 wwv_flow_api.create_plugin_attr_value(
- p_id=>wwv_flow_api.id(12551292056588972)
-,p_plugin_attribute_id=>wwv_flow_api.id(12550763247587570)
+ p_id=>wwv_flow_api.id(36363309265797156192)
+,p_plugin_attribute_id=>wwv_flow_api.id(36363308736988154790)
 ,p_display_sequence=>10
 ,p_display_value=>'true'
 ,p_return_value=>'true'
 ,p_is_quick_pick=>true
 );
 wwv_flow_api.create_plugin_attr_value(
- p_id=>wwv_flow_api.id(12551688217589978)
-,p_plugin_attribute_id=>wwv_flow_api.id(12550763247587570)
+ p_id=>wwv_flow_api.id(36363309661958157198)
+,p_plugin_attribute_id=>wwv_flow_api.id(36363308736988154790)
 ,p_display_sequence=>20
 ,p_display_value=>'false'
 ,p_return_value=>'false'
 ,p_is_quick_pick=>true
 );
 wwv_flow_api.create_plugin_attribute(
- p_id=>wwv_flow_api.id(12555144589913420)
-,p_plugin_id=>wwv_flow_api.id(40765738027245842)
+ p_id=>wwv_flow_api.id(36363313118330480640)
+,p_plugin_id=>wwv_flow_api.id(36391523711767813062)
 ,p_attribute_scope=>'COMPONENT'
 ,p_attribute_sequence=>6
 ,p_display_sequence=>170
@@ -667,26 +690,27 @@ wwv_flow_api.create_plugin_attribute(
 ,p_default_value=>'Box'
 ,p_is_translatable=>false
 ,p_lov_type=>'STATIC'
+,p_help_text=>'Displays tasks as box with a free size or as a box which will be displayed in respect of duration'
 );
 wwv_flow_api.create_plugin_attr_value(
- p_id=>wwv_flow_api.id(12555680443914425)
-,p_plugin_attribute_id=>wwv_flow_api.id(12555144589913420)
+ p_id=>wwv_flow_api.id(36363313654184481645)
+,p_plugin_attribute_id=>wwv_flow_api.id(36363313118330480640)
 ,p_display_sequence=>10
 ,p_display_value=>'Box'
 ,p_return_value=>'Box'
 ,p_is_quick_pick=>true
 );
 wwv_flow_api.create_plugin_attr_value(
- p_id=>wwv_flow_api.id(12556145551915336)
-,p_plugin_attribute_id=>wwv_flow_api.id(12555144589913420)
+ p_id=>wwv_flow_api.id(36363314119292482556)
+,p_plugin_attribute_id=>wwv_flow_api.id(36363313118330480640)
 ,p_display_sequence=>20
 ,p_display_value=>'Timeline'
 ,p_return_value=>'Timeline'
 ,p_is_quick_pick=>true
 );
 wwv_flow_api.create_plugin_attribute(
- p_id=>wwv_flow_api.id(12557437935478927)
-,p_plugin_id=>wwv_flow_api.id(40765738027245842)
+ p_id=>wwv_flow_api.id(36363315411676046147)
+,p_plugin_id=>wwv_flow_api.id(36391523711767813062)
 ,p_attribute_scope=>'COMPONENT'
 ,p_attribute_sequence=>7
 ,p_display_sequence=>180
@@ -695,55 +719,59 @@ wwv_flow_api.create_plugin_attribute(
 ,p_is_required=>false
 ,p_column_data_types=>'DATE:TIMESTAMP:TIMESTAMP_TZ:TIMESTAMP_LTZ'
 ,p_is_translatable=>false
+,p_help_text=>'Optionnaly, an end date'
 );
 wwv_flow_api.create_plugin_attribute(
- p_id=>wwv_flow_api.id(9577517118525309)
-,p_plugin_id=>wwv_flow_api.id(40765738027245842)
+ p_id=>wwv_flow_api.id(36360335490859092529)
+,p_plugin_id=>wwv_flow_api.id(36391523711767813062)
 ,p_attribute_scope=>'COMPONENT'
 ,p_attribute_sequence=>8
-,p_display_sequence=>190
-,p_prompt=>'Date field'
+,p_display_sequence=>200
+,p_prompt=>'Target Date field'
 ,p_attribute_type=>'PAGE ITEM'
 ,p_is_required=>true
 ,p_is_translatable=>false
-,p_depending_on_attribute_id=>wwv_flow_api.id(12550763247587570)
+,p_depending_on_attribute_id=>wwv_flow_api.id(36363308736988154790)
 ,p_depending_on_has_to_exist=>true
 ,p_depending_on_condition_type=>'EQUALS'
 ,p_depending_on_expression=>'true'
+,p_help_text=>'If Edit mode, this is the StartDate field name in the target detail page.'
 );
 wwv_flow_api.create_plugin_attribute(
- p_id=>wwv_flow_api.id(9578614359540901)
-,p_plugin_id=>wwv_flow_api.id(40765738027245842)
+ p_id=>wwv_flow_api.id(36360336588100108121)
+,p_plugin_id=>wwv_flow_api.id(36391523711767813062)
 ,p_attribute_scope=>'COMPONENT'
 ,p_attribute_sequence=>9
-,p_display_sequence=>200
-,p_prompt=>'Resource field'
+,p_display_sequence=>210
+,p_prompt=>'Target Resource field'
 ,p_attribute_type=>'PAGE ITEM'
 ,p_is_required=>true
 ,p_is_translatable=>false
-,p_depending_on_attribute_id=>wwv_flow_api.id(12550763247587570)
+,p_depending_on_attribute_id=>wwv_flow_api.id(36363308736988154790)
 ,p_depending_on_has_to_exist=>true
 ,p_depending_on_condition_type=>'EQUALS'
 ,p_depending_on_expression=>'true'
+,p_help_text=>'If Edit mode, this is the Resource field name in the target detail page.'
 );
 wwv_flow_api.create_plugin_attribute(
- p_id=>wwv_flow_api.id(9579295869542971)
-,p_plugin_id=>wwv_flow_api.id(40765738027245842)
+ p_id=>wwv_flow_api.id(36360337269610110191)
+,p_plugin_id=>wwv_flow_api.id(36391523711767813062)
 ,p_attribute_scope=>'COMPONENT'
 ,p_attribute_sequence=>10
-,p_display_sequence=>210
-,p_prompt=>'Id field'
+,p_display_sequence=>190
+,p_prompt=>'Target Id field'
 ,p_attribute_type=>'PAGE ITEM'
 ,p_is_required=>true
 ,p_is_translatable=>false
-,p_depending_on_attribute_id=>wwv_flow_api.id(12550763247587570)
+,p_depending_on_attribute_id=>wwv_flow_api.id(36363308736988154790)
 ,p_depending_on_has_to_exist=>true
 ,p_depending_on_condition_type=>'EQUALS'
 ,p_depending_on_expression=>'true'
+,p_help_text=>'If Edit mode, this is the ID field name in the target detail page.'
 );
 wwv_flow_api.create_plugin_attribute(
- p_id=>wwv_flow_api.id(9579893847557826)
-,p_plugin_id=>wwv_flow_api.id(40765738027245842)
+ p_id=>wwv_flow_api.id(36360337867588125046)
+,p_plugin_id=>wwv_flow_api.id(36391523711767813062)
 ,p_attribute_scope=>'COMPONENT'
 ,p_attribute_sequence=>11
 ,p_display_sequence=>220
@@ -753,15 +781,55 @@ wwv_flow_api.create_plugin_attribute(
 ,p_default_value=>'MM-DD-YYYY HH24:MI:SS'
 ,p_max_length=>50
 ,p_is_translatable=>false
-,p_depending_on_attribute_id=>wwv_flow_api.id(12550763247587570)
+,p_depending_on_attribute_id=>wwv_flow_api.id(36363308736988154790)
 ,p_depending_on_has_to_exist=>true
 ,p_depending_on_condition_type=>'EQUALS'
 ,p_depending_on_expression=>'true'
 ,p_help_text=>'The format of date which will be used for transmiting the date into the detail form'
 );
 wwv_flow_api.create_plugin_attribute(
- p_id=>wwv_flow_api.id(9582166306724721)
-,p_plugin_id=>wwv_flow_api.id(40765738027245842)
+ p_id=>wwv_flow_api.id(36357186479518646838)
+,p_plugin_id=>wwv_flow_api.id(36391523711767813062)
+,p_attribute_scope=>'COMPONENT'
+,p_attribute_sequence=>12
+,p_display_sequence=>185
+,p_prompt=>'Target Detail Page'
+,p_attribute_type=>'PAGE NUMBER'
+,p_is_required=>true
+,p_is_translatable=>false
+,p_depending_on_attribute_id=>wwv_flow_api.id(36363308736988154790)
+,p_depending_on_has_to_exist=>true
+,p_depending_on_condition_type=>'EQUALS'
+,p_depending_on_expression=>'true'
+,p_help_text=>'The target detail page number.'
+);
+wwv_flow_api.create_plugin_attribute(
+ p_id=>wwv_flow_api.id(36357189448963162704)
+,p_plugin_id=>wwv_flow_api.id(36391523711767813062)
+,p_attribute_scope=>'COMPONENT'
+,p_attribute_sequence=>13
+,p_display_sequence=>215
+,p_prompt=>'Internal resource column'
+,p_attribute_type=>'REGION SOURCE COLUMN'
+,p_is_required=>true
+,p_column_data_types=>'VARCHAR2:NUMBER'
+,p_is_translatable=>false
+,p_depending_on_attribute_id=>wwv_flow_api.id(36363308736988154790)
+,p_depending_on_has_to_exist=>true
+,p_depending_on_condition_type=>'EQUALS'
+,p_depending_on_expression=>'true'
+,p_help_text=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'The column internal value which will be used for retrieving the displayed value of resource. Can be the same as resource column.',
+'ie: if query is: ',
+'select e.*, d.dname from emp e, dept d where e.deptno=d.deptno',
+'and if the group column is DNAME, then the column internal value wil be: DEPTNO'))
+);
+end;
+/
+begin
+wwv_flow_api.create_plugin_attribute(
+ p_id=>wwv_flow_api.id(36360340140047291941)
+,p_plugin_id=>wwv_flow_api.id(36391523711767813062)
 ,p_attribute_scope=>'COMPONENT'
 ,p_attribute_sequence=>14
 ,p_display_sequence=>230
@@ -773,67 +841,82 @@ wwv_flow_api.create_plugin_attribute(
 ,p_is_translatable=>false
 ,p_lov_type=>'STATIC'
 ,p_null_text=>'-Select a zoom scale -'
+,p_help_text=>'The zoom scale minimum (ie: no more detail than 6 hours in a page)'
 );
 wwv_flow_api.create_plugin_attr_value(
- p_id=>wwv_flow_api.id(9582754666726724)
-,p_plugin_attribute_id=>wwv_flow_api.id(9582166306724721)
+ p_id=>wwv_flow_api.id(36360340728407293944)
+,p_plugin_attribute_id=>wwv_flow_api.id(36360340140047291941)
 ,p_display_sequence=>10
 ,p_display_value=>'Six hours'
 ,p_return_value=>'21600000'
 ,p_is_quick_pick=>true
 );
 wwv_flow_api.create_plugin_attr_value(
- p_id=>wwv_flow_api.id(9583171855730015)
-,p_plugin_attribute_id=>wwv_flow_api.id(9582166306724721)
+ p_id=>wwv_flow_api.id(36360341145596297235)
+,p_plugin_attribute_id=>wwv_flow_api.id(36360340140047291941)
 ,p_display_sequence=>20
 ,p_display_value=>'One day'
 ,p_return_value=>'86400000'
 ,p_is_quick_pick=>true
 );
 wwv_flow_api.create_plugin_attribute(
- p_id=>wwv_flow_api.id(6428505778079618)
-,p_plugin_id=>wwv_flow_api.id(40765738027245842)
+ p_id=>wwv_flow_api.id(36370584791599244834)
+,p_plugin_id=>wwv_flow_api.id(36391523711767813062)
 ,p_attribute_scope=>'COMPONENT'
-,p_attribute_sequence=>12
-,p_display_sequence=>185
-,p_prompt=>'Detail Page'
-,p_attribute_type=>'PAGE NUMBER'
+,p_attribute_sequence=>15
+,p_display_sequence=>240
+,p_prompt=>'Locale'
+,p_attribute_type=>'SELECT LIST'
 ,p_is_required=>true
+,p_default_value=>'us'
 ,p_is_translatable=>false
-,p_depending_on_attribute_id=>wwv_flow_api.id(12550763247587570)
-,p_depending_on_has_to_exist=>true
-,p_depending_on_condition_type=>'EQUALS'
-,p_depending_on_expression=>'true'
+,p_lov_type=>'STATIC'
+,p_help_text=>'Locale for displaying the time labels'
 );
-wwv_flow_api.create_plugin_attribute(
- p_id=>wwv_flow_api.id(6431475222595484)
-,p_plugin_id=>wwv_flow_api.id(40765738027245842)
-,p_attribute_scope=>'COMPONENT'
-,p_attribute_sequence=>13
-,p_display_sequence=>215
-,p_prompt=>'Internal resource column'
-,p_attribute_type=>'REGION SOURCE COLUMN'
-,p_is_required=>true
-,p_column_data_types=>'VARCHAR2:NUMBER'
-,p_is_translatable=>false
-,p_depending_on_attribute_id=>wwv_flow_api.id(12550763247587570)
-,p_depending_on_has_to_exist=>true
-,p_depending_on_condition_type=>'EQUALS'
-,p_depending_on_expression=>'true'
-,p_help_text=>'The column internal value which will be used for retrieving the displayed value of resource. Can be the same as resource column.'
+wwv_flow_api.create_plugin_attr_value(
+ p_id=>wwv_flow_api.id(36370491567092244074)
+,p_plugin_attribute_id=>wwv_flow_api.id(36370584791599244834)
+,p_display_sequence=>10
+,p_display_value=>'us'
+,p_return_value=>'us'
+,p_is_quick_pick=>true
+);
+wwv_flow_api.create_plugin_attr_value(
+ p_id=>wwv_flow_api.id(36370493051736244935)
+,p_plugin_attribute_id=>wwv_flow_api.id(36370584791599244834)
+,p_display_sequence=>20
+,p_display_value=>'de'
+,p_return_value=>'de'
+,p_is_quick_pick=>true
+);
+wwv_flow_api.create_plugin_attr_value(
+ p_id=>wwv_flow_api.id(36370494198042245589)
+,p_plugin_attribute_id=>wwv_flow_api.id(36370584791599244834)
+,p_display_sequence=>30
+,p_display_value=>'fr'
+,p_return_value=>'fr'
+,p_is_quick_pick=>true
+);
+wwv_flow_api.create_plugin_attr_value(
+ p_id=>wwv_flow_api.id(36370619376340246265)
+,p_plugin_attribute_id=>wwv_flow_api.id(36370584791599244834)
+,p_display_sequence=>40
+,p_display_value=>'sp'
+,p_return_value=>'sp'
+,p_is_quick_pick=>true
 );
 wwv_flow_api.create_plugin_std_attribute(
- p_id=>wwv_flow_api.id(40774980004245850)
-,p_plugin_id=>wwv_flow_api.id(40765738027245842)
+ p_id=>wwv_flow_api.id(36391532953744813070)
+,p_plugin_id=>wwv_flow_api.id(36391523711767813062)
 ,p_name=>'INIT_JAVASCRIPT_CODE'
 ,p_is_required=>false
 ,p_supported_ui_types=>'DESKTOP'
 ,p_depending_on_has_to_exist=>true
 );
 wwv_flow_api.create_plugin_std_attribute(
- p_id=>wwv_flow_api.id(40784033366414080)
-,p_plugin_id=>wwv_flow_api.id(40765738027245842)
-,p_name=>'SOURCE_LOCATION'
+ p_id=>wwv_flow_api.id(3308977422685003)
+,p_plugin_id=>wwv_flow_api.id(36391523711767813062)
+,p_name=>'SOURCE_SQL'
 );
 end;
 /
@@ -3346,8 +3429,8 @@ end;
 /
 begin
 wwv_flow_api.create_plugin_file(
- p_id=>wwv_flow_api.id(3278731526908181)
-,p_plugin_id=>wwv_flow_api.id(40765738027245842)
+ p_id=>wwv_flow_api.id(36354036705267475401)
+,p_plugin_id=>wwv_flow_api.id(36391523711767813062)
 ,p_file_name=>'moment-with-locales.min.js'
 ,p_mime_type=>'application/javascript'
 ,p_file_charset=>'utf-8'
@@ -3700,8 +3783,8 @@ end;
 /
 begin
 wwv_flow_api.create_plugin_file(
- p_id=>wwv_flow_api.id(12504170891945783)
-,p_plugin_id=>wwv_flow_api.id(40765738027245842)
+ p_id=>wwv_flow_api.id(36363262144632513003)
+,p_plugin_id=>wwv_flow_api.id(36391523711767813062)
 ,p_file_name=>'moment.min.js'
 ,p_mime_type=>'application/javascript'
 ,p_file_charset=>'utf-8'
@@ -3954,8 +4037,8 @@ end;
 /
 begin
 wwv_flow_api.create_plugin_file(
- p_id=>wwv_flow_api.id(40814143996548877)
-,p_plugin_id=>wwv_flow_api.id(40765738027245842)
+ p_id=>wwv_flow_api.id(36391572117737116097)
+,p_plugin_id=>wwv_flow_api.id(36391523711767813062)
 ,p_file_name=>'vis.min.css'
 ,p_mime_type=>'text/css'
 ,p_file_charset=>'utf-8'
@@ -10889,8 +10972,8 @@ end;
 /
 begin
 wwv_flow_api.create_plugin_file(
- p_id=>wwv_flow_api.id(40814593805550850)
-,p_plugin_id=>wwv_flow_api.id(40765738027245842)
+ p_id=>wwv_flow_api.id(36391572567546118070)
+,p_plugin_id=>wwv_flow_api.id(36391523711767813062)
 ,p_file_name=>'vis.min.js'
 ,p_mime_type=>'application/javascript'
 ,p_file_charset=>'utf-8'
