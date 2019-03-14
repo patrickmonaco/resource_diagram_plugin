@@ -10,11 +10,10 @@ In any page, add a new region based on "Resource Diagram plugin"
 Then, provide the following informations:
 - a regular query which must return:
    - resource name
-   - start date
+   - start date (DATE datatype only)
    - task name
-  
-  and optionnaly:
-  - an end_date
+   - End_date (optionnaly)
+
 - Group name column
 - Task name column
 - Start Date column
@@ -33,3 +32,9 @@ After applying changes on the detail page and once the modal window is closed, t
 
 Each time a user double clicks on a task or move it in an another lane or time slot, the plugin triggers the detail page (cf above).
 If a double click occurs in a blank area of the diagramm, a detail page in displayed with only the resource name filled.
+
+## Limitations
+
+Doesn't work with TIMESTAMP datatype, yet
+It will be added soon. 
+
