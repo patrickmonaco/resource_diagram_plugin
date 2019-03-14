@@ -7,10 +7,10 @@ cf http://visjs.org/docs/timeline/
 Import this plugin
 In any page, add a new region based on "Resource Diagram plugin"
 provide the following informations:
-a regular query which must return:
-   resource name
-   start date
-   task name
+- a regular query which must return:
+   - resource name
+   - start date
+   - task name
   
   and optionnaly:
-  an end_date
+  - an end_date
