@@ -38,3 +38,6 @@ If a double click occurs in a blank area of the diagramm, a detail page in displ
 Doesn't work with TIMESTAMP datatype, yet
 It will be added soon. 
 
+- VIS.js module will be in end of life status as of March 2019.
+https://github.com/almende/vis/issues/4259
+
