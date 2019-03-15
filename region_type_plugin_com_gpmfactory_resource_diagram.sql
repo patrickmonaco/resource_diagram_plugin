@@ -254,7 +254,7 @@ wwv_flow_api.create_plugin(
 '         }',
 '      , { dataType: "text"',
 '        ,success: function(pData){',
-'             ',
+'            //console.log(pData); ',
 '             var d1 = JSON.parse(pData); ',
 '             renderPlan(d1); ',
 '             }       ',
@@ -466,7 +466,7 @@ wwv_flow_api.create_plugin(
 '                     p_column_alias      => l_start_col,',
 '                     p_column_value_list => l_cvalue_list,',
 '                     p_is_required       => true,',
-'                     p_data_type         => apex_plugin_util.c_data_type_date',
+'                     p_data_type         => apex_plugin_util.c_data_type_varchar2',
 '                 ); ',
 'if l_end_col IS NOT NULL then                 ',
 '    end_colno  := apex_plugin_util.get_column_no (',
@@ -474,7 +474,7 @@ wwv_flow_api.create_plugin(
 '                       p_column_alias      => l_end_col,',
 '                       p_column_value_list => l_cvalue_list,',
 '                       p_is_required       => true,',
-'                       p_data_type         => apex_plugin_util.c_data_type_date',
+'                       p_data_type         => apex_plugin_util.c_data_type_varchar2',
 '                   ); ',
 'end if;   ',
 '',
@@ -586,7 +586,7 @@ wwv_flow_api.create_plugin(
 'start date: HIREDATE',
 'id: EMPNO',
 'task name: ENAME'))
-,p_version_identifier=>'1.1'
+,p_version_identifier=>'1.2'
 ,p_about_url=>'https://github.com/patrickmonaco/resource_diagram_plugin'
 ,p_files_version=>6
 );
