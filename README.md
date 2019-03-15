@@ -10,7 +10,7 @@ In any page, add a new region based on "Resource Diagram plugin"
 Then, provide the following informations:
 - a regular query which must return:
    - resource name
-   - start date (DATE datatype only)
+   - start date (DATE or TIMESTAMP datatypes)
    - task name
    - End_date (optionnaly)
 
@@ -34,9 +34,6 @@ Each time a user double clicks on a task or move it in an another lane or time s
 If a double click occurs in a blank area of the diagramm, a detail page in displayed with only the resource name filled.
 
 ## Limitations
-
-Doesn't work with TIMESTAMP datatype, yet
-It will be added soon. 
 
 - VIS.js module will be in end of life status as of March 2019.
 https://github.com/almende/vis/issues/4259
